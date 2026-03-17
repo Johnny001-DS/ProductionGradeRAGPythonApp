@@ -458,6 +458,8 @@ For issues, questions, or suggestions:
 **Karan Badlani**  
 **Repository**: [ProductionGradeRAGPythonApp](https://github.com/Johnny001-DS/ProductionGradeRAGPythonApp)
 
+*This project was accelerated from 0 → 1 deployment using Claude Copilot for code generation and architecture design.*
+
 ---
 
 **Last Updated**: March 2026  
