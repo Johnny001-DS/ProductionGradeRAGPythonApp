@@ -437,10 +437,6 @@ docker run -p 8000:8000 -p 8501:8501 \
 - [ ] Parallel document ingestion
 - [ ] Interactive prompt optimization UI
 
-## 📄 License
-
-This project is provided as-is for educational and commercial use.
-
 ## 🤝 Contributing
 
 Contributions welcome! Please:
@@ -457,9 +453,9 @@ For issues, questions, or suggestions:
 - Check existing documentation and troubleshooting section
 - Review Inngest, Qdrant, and LlamaIndex documentation
 
-## 📞 Contact
+## 👤 Author
 
-**Author**: Johnny001-DS  
+**Karan Badlani**  
 **Repository**: [ProductionGradeRAGPythonApp](https://github.com/Johnny001-DS/ProductionGradeRAGPythonApp)
 
 ---
