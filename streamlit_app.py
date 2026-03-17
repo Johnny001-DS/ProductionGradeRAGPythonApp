@@ -7,6 +7,7 @@ import inngest
 from dotenv import load_dotenv
 import os
 import requests
+from rag_evaluator import evaluate_query, generate_evaluation_report
 
 load_dotenv()
 
@@ -123,4 +124,84 @@ with st.form("rag_query_form"):
             st.caption("Sources")
             for s in sources:
                 st.write(f"- {s}")
+
+        # Store query data in session for evaluation
+        st.session_state.last_query = {
+            "question": question.strip(),
+            "answer": answer,
+            "contexts": output.get("contexts", []),
+            "sources": sources,
+        }
+
+
+# On-demand Evaluation Section
+st.divider()
+st.title("📊 Evaluate RAG Quality")
+
+if "last_query" in st.session_state and st.session_state.last_query.get("answer"):
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        st.info("Evaluate the quality of the last generated answer using RAGAS metrics")
+    
+    with col2:
+        if st.button("Evaluate Answer", key="eval_btn"):
+            with st.spinner("Running RAGAS evaluation... (this may take a moment)"):
+                try:
+                    query_data = st.session_state.last_query
+                    
+                    # Run evaluation
+                    metrics = evaluate_query(
+                        question=query_data["question"],
+                        answer=query_data["answer"],
+                        contexts=query_data["contexts"],
+                    )
+                    
+                    # Display results
+                    st.success("Evaluation complete!")
+                    
+                    # Create columns for metric display
+                    metric_cols = st.columns(4)
+                    
+                    metrics_dict = [
+                        ("Faithfulness", metrics.faithfulness, "Is the answer factually consistent with context?"),
+                        ("Answer Relevance", metrics.answer_relevance, "Does the answer address the question?"),
+                        ("Context Relevance", metrics.context_relevance, "Are the contexts relevant to the question?"),
+                        ("Context Recall", metrics.context_recall, "Did we retrieve all necessary information?"),
+                    ]
+                    
+                    for idx, (col, (name, score, desc)) in enumerate(zip(metric_cols, metrics_dict)):
+                        with col:
+                            if score is not None:
+                                # Color code based on score
+                                if score > 0.8:
+                                    color = "🟢"
+                                elif score > 0.6:
+                                    color = "🟡"
+                                else:
+                                    color = "🔴"
+                                
+                                st.metric(
+                                    label=name,
+                                    value=f"{score:.3f}",
+                                    delta=color,
+                                )
+                                st.caption(desc, unsafe_allow_html=True)
+                            else:
+                                st.metric(label=name, value="N/A")
+                    
+                    # Display detailed report
+                    st.subheader("📋 Detailed Report")
+                    report = generate_evaluation_report(metrics)
+                    st.code(report, language="text")
+                    
+                    # Store evaluation in session
+                    st.session_state.last_evaluation = metrics
+                    
+                except Exception as e:
+                    st.error(f"Evaluation failed: {str(e)}")
+                    st.info("Make sure RAGAS and its dependencies are installed: `pip install ragas datasets`")
+else:
+    st.info("👆 Ask a question above first to evaluate an answer")
+
 
